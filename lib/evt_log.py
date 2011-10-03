@@ -59,7 +59,7 @@ class EvtLog:
     def getRecords(self, base, num):
     """Get a list of all records in the log, starting at base and extending 
        num records. Return a list of EvtRecords."""
-        return _record
+        return _records
     
     def getNextRecord(self):
     """Get the next record from this log. Returns an EvtRecord object."""

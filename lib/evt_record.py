@@ -24,39 +24,38 @@ import evt_plugin
 
 class EvtRecord:
 """Definition of a single record from a Windows Event Log"""
-   
-    def length(self):
-        return _length
-    def setLength(self):
-        _length = x
+    
+    # Fields of each EVT record
+    _fields["length"] = ""
+    _fields["reserved"] = ""
+    _fields["recordNumer"] = ""
+    _fields["timeGenerated"] = ""
+    _fields["timeWritten"] = ""
+    _fields["eventID"] = ""
+    _fields["eventType"] = "" _fields["numStrings"] = ""
+    _fields["eventCategory"] = ""
+    _fields["reservedFlags"] = ""
+    _fields["closingRecordNumber"] = ""
+    _fields["stringOffset"] = ""
+    _fields["userSidLength"] = ""
+    _fields["userSidOffset"] = ""
+    _fields["dataLength"] = ""
+    _fields["dataOffset"] = ""
 
-    def reserved(self):
-        return _reserved
-    def setReserved(self, x):
-        _reserved = x
+    def getField(self, key):
+    """Get the value of a particular field in an EVT log record"""
+        if key not in _fields:
+            print "Unknown field " + key
+            return
+        return _fields[key]
 
-    def recordNumber(self):
-        return _recordNumber
-    def setRecordNumber(self, x):
-        _recordNumber = x
+    def setField(self, key, val):
+    """Set the value of a particular field in an EVT log record"""
+        if key not in _fields:
+            print "Unknown field " + key
+            return
+        _fields[key] = val
 
-    def timeGenerated(self):
-        return _timeGenerated
-    def setTimeGenerated(self, x):
-        _timeGenerated = x
-
-    def timeWritten(self):
-        return _timeWritten
-    def setTimeWritten(self, x):
-        _timeWritten = x
-
-    def eventID(self):
-        return _eventID
-    def setEventID(self, x):
-        _eventID = x
-
-    def eventType(self):
-        return _eventType
-    def setEventType(self, x):
-        _eventType = x
-
+    def getRecordFields(self):
+    """Return a list of the fields defined in this EVT log record"""
+        return keys(_fields)
