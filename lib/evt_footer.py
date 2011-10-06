@@ -51,30 +51,3 @@ class EvtFooter:
             return
         _fields[key] = val
 
-    _fields["headerSize"] = magic["headerSize"]
-    _fields["signature"] = magic["signature"]
-    _fields["majorVersion"] = magic["majorVersion"]
-    _fields["minorVersion"] = magic["minorVersion"]
-    _fields["startOffset"] = ""
-    _fields["endOffset"] = ""
-    _fields["currentRecordNum"] = ""
-    _fields["oldestRecordNum"] = ""
-    _fields["maxSize"] = ""
-    _fields["flags"] = ""
-    _fields["retention"] = ""
-    _fields["endHeaderSize" = magic["endHeaderSize"]
-
-    def getField(self, key):
-        if key not in fields:
-            print "Unknown field " + key
-            return
-        return _fields[key]
-
-    def setField(self, key, val):
-        if key not in fields:
-            print "Unknown field " + key
-            return
-        _fields[key] = val
-
-    
-
