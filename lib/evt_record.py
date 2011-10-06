@@ -22,17 +22,21 @@
 import evt_log
 import evt_plugin
 
+# Magic string common to all EVT records ("eLfL")
+evt_magic_string = evt_log.header_magic["signature"]
+
 class EvtRecord:
 """Definition of a single record from a Windows Event Log"""
     
     # Fields of each EVT record
     _fields["length"] = ""
-    _fields["reserved"] = ""
+    _fields["reserved"] = evt_magic_string
     _fields["recordNumer"] = ""
     _fields["timeGenerated"] = ""
     _fields["timeWritten"] = ""
     _fields["eventID"] = ""
-    _fields["eventType"] = "" _fields["numStrings"] = ""
+    _fields["eventType"] = "" 
+    _fields["numStrings"] = ""
     _fields["eventCategory"] = ""
     _fields["reservedFlags"] = ""
     _fields["closingRecordNumber"] = ""

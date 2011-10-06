@@ -22,4 +22,19 @@
 from ctypes import *
 from evt_record import *
 from evt_plugin import *
+from evt_log_header_binary import *
+from evt_log_record_binary import *
+from evt_log_footer_binary import *
 
+class BinaryLog(Structure):
+    _fields_ = [
+        # Header
+        ("header", BinaryHeader),
+
+        # Records
+        ("record1", BinaryRecord),
+        ("recordN", BinaryRecord),
+
+        # Footer
+        ("footer", BinaryFooter),
+    ]
