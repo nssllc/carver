@@ -18,30 +18,20 @@
 #
 
 class Plugin:
-"""Generic plugin class.  Extend this class for format-specific support."""
     _name = ""          # Short name used to identify this plugin 
-    _versionMajor = 0   
-    _versionMinor = 0
-    _description = ""
-    _file = pass
+    #_file = pass
     _maxBufferSize = 1024 * 1024 * 100  # 100 MB limit on buffer sizes
 
-    def __init__(self, name, major, minor, desc):
-        _name = name
-        _versionMajor = major
-        _versionMinor = minor
-        _description = desc
-
     def search(self, data):
-    """Search data for log files.  Return a list EvtLog objects."""
+        """Search data for log files.  Return a list EvtLog objects."""
         return []
 
     def parseLog(self, log):
-    """Parse a log file"""
+        """Parse a log file"""
         return 0
 
     def exportCSV(self, log):
-    """Export a log file to a CSV file"""
+        """Export a log file to a CSV file"""
 
     def getMaxBufferSize(self):
         return _maxBufferSize

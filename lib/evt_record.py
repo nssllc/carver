@@ -19,22 +19,25 @@
 # http://msdn.microsoft.com/en-us/library/windows/desktop/aa363646(v=vs.85).aspx
 #
 
-import evt_log
+import evt_header
 import evt_plugin
 
-# Magic string common to all EVT records ("eLfL")
-evt_magic_string = evt_log.header_magic["signature"]
+# Fixed record size
+FixedSize = 0x38
 
 class EvtRecord:
-"""Definition of a single record from a Windows Event Log"""
-    
+    """Definition of a single record from a Windows Event Log"""
+    _pos = 0        # Position in bytestream of this record
+    _fields = {}
+
     # Fields of each EVT record
     _fields["length"] = ""
-    _fields["reserved"] = evt_magic_string
-    _fields["recordNumer"] = ""
+    _fields["reserved"] = evt_header.MagicString
+    _fields["recordNumber"] = ""
     _fields["timeGenerated"] = ""
     _fields["timeWritten"] = ""
     _fields["eventID"] = ""
+    _fields["eventRVA"] = ""
     _fields["eventType"] = "" 
     _fields["numStrings"] = ""
     _fields["eventCategory"] = ""
@@ -45,21 +48,54 @@ class EvtRecord:
     _fields["userSidOffset"] = ""
     _fields["dataLength"] = ""
     _fields["dataOffset"] = ""
+    _fields["varData"] = ""
+
+    def setPosition(self, pos):
+        """Set the value of this record's position"""
+        if pos < 0:
+            pos = 0
+        _pos = pos
 
     def getField(self, key):
-    """Get the value of a particular field in an EVT log record"""
-        if key not in _fields:
+        """Get the value of a particular field in an EVT log record"""
+        if key not in self._fields:
             print "Unknown field " + key
             return
-        return _fields[key]
+        return self._fields[key]
 
     def setField(self, key, val):
-    """Set the value of a particular field in an EVT log record"""
-        if key not in _fields:
+        """Set the value of a particular field in an EVT log record"""
+        if key not in self._fields:
             print "Unknown field " + key
             return
-        _fields[key] = val
+        self._fields[key] = val
 
     def getRecordFields(self):
-    """Return a list of the fields defined in this EVT log record"""
-        return keys(_fields)
+        """Return a list of the fields defined in this EVT log record"""
+        return keys(self._fields)
+
+    def printRecord(self):
+        """Print this record in a human-readable format."""
+        print "Length: %d" % self._fields["length"] 
+        print "Reserved: %s" % self._fields["reserved"]
+        print "Record Number: %d" % self._fields["recordNumber"]
+        print "Time Generated: %s" % \
+            self._fields["timeGenerated"]
+        print "Time Written: %s" % \
+            self._fields["timeWritten"]
+        print "Event ID: %d" % self._fields["eventID"]
+        print "Event RVA Offset: %d" % self._fields["eventRVA"]
+        print "Event Type: %d" % self._fields["eventType"]
+        print "Number of Strings: %d" % self._fields["numStrings"]
+        print "Event Category: %d" % self._fields["eventCategory"]
+        print "Reserved Flags: %d" % self._fields["reservedFlags"]
+        print "Closing Record Number: %d" % \
+            self._fields["closingRecordNumber"]
+        print "String Offset: %d" % self._fields["stringOffset"]
+        print "SID Length: %d" % self._fields["userSidLength"]
+        print "SID Offset: %d" % self._fields["userSidOffset"]
+        print "Data Length: %d" % self._fields["dataLength"]
+        print "Data Offset: %d" % self._fields["dataOffset"]
+        print "Variable Data: %s" % self._fields["varData"]
+        
+

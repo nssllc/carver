@@ -20,8 +20,10 @@
 #
 
 # String that occurs in every EVT record ("eLfL")
-MagicString = "0x654c664c"
+MagicString = "0x4c664c65"
 
+# Other header constants defined by the EVT standard
+magic = {}
 magic["headerSize"] = "0x30"
 magic["signature"] = MagicString
 magic["majorVersion"] = "1"
@@ -29,7 +31,8 @@ magic["minorVersion"] = "1"
 magic["endHeaderSize"] = "0x30"
 
 class EvtHeader:
-"""Internal representation of an EVT log header"""
+    """Internal representation of an EVT log header"""
+    _fields = {}
     _fields["headerSize"] = magic["headerSize"]
     _fields["signature"] = magic["signature"]
     _fields["majorVersion"] = magic["majorVersion"]
@@ -41,7 +44,7 @@ class EvtHeader:
     _fields["maxSize"] = ""
     _fields["flags"] = ""
     _fields["retention"] = ""
-    _fields["endHeaderSize" = magic["endHeaderSize"]
+    _fields["endHeaderSize"] = magic["endHeaderSize"]
 
     def getField(self, key):
         if key not in _fields:

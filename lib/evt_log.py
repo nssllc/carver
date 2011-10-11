@@ -19,6 +19,7 @@
 # http://msdn.microsoft.com/en-us/library/windows/desktop/bb309024(v=vs.85).aspx
 #
 
+from bitstream import *
 from evt_record import *
 from evt_plugin import *
 from evt_log_header_binary import *

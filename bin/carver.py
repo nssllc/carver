@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright (C) 2011 Network Security Services, LLC
 # 
@@ -9,7 +10,7 @@
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GlNU Gen eral Public License for more details.
+# GNU General Public License for more details.
 # 
 # carver.py
 # David Windsor <dwindsor@networksecurityservicesllc.com>
@@ -17,11 +18,20 @@
 # Usage: carver.py [-t <type>] <file>
 #
 
+import sys
+sys.path.append("../lib")
 from plugin import *
 from evt_plugin import *
+import evt_record
 
-evtPlugin = EvtPlugin()
-(evtHeaders, evtRecords) = evtPlugin.searchFile("unalloc.bin")
+evt = EvtPlugin()
+(headers, records) = evt.searchFile("../var/AppEvent.Evt")
 
-print "Found " + evtHeaders.size() " EVT headers."
-print "Found " + evtRecords.size() " EVT records."
+n = 0
+for r in records:
+    n += 1
+print "Found " + str(n) + " EVT records."
+
+#for r in records:
+#    r.printRecord()
+#    print
