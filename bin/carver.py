@@ -18,20 +18,19 @@
 # Usage: carver.py [-t <type>] <file>
 #
 
+import os
 import sys
-sys.path.append("../lib")
-from plugin import *
-from evt_plugin import *
-import evt_record
+# Compute absolute path for import purposes
+path = os.path.dirname(sys.argv[0])
+abspath = os.path.abspath(path)
+sys.path.append(abspath + "/../lib")
+
+import plugin
+from evt_plugin import EvtPlugin
 
 evt = EvtPlugin()
 (headers, records) = evt.searchFile("../var/AppEvent.Evt")
 
-n = 0
 for r in records:
-    n += 1
-print "Found " + str(n) + " EVT records."
-
-#for r in records:
-#    r.printRecord()
-#    print
+    r.printRecord()
+    print
