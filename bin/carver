@@ -33,12 +33,13 @@ from evt_plugin import EvtPlugin
 parser = argparse.ArgumentParser(description="Find forensics data.")
 parser.add_argument("files", metavar="files", nargs="*", \
     help="files to be searched")
-parser.add_argument("-t", "--type", nargs="*", \
+parser.add_argument("-t", "--type", action="append", \
     help="type of data to be carved")
-parser.add_argument("--list-types", action="store_const", \
-    const="list_types", help="list supported data types")
+parser.add_argument("--list-types", action="store_true", \
+    help="list supported data types")
 parser.add_argument("--version", "-V", action="version", \
-    version=carver_lib.version, help="print version information")
+    version="%(prog)s " + carver_lib.version, \
+    help="print version information")
 
 args = parser.parse_args()
 
@@ -49,17 +50,26 @@ if len(sys.argv) == 1:
 # List supported types
 if args.list_types:
     types = carver_lib.getSupportedTypes()
-    print "Supported types:",
     print types
     exit()
 
+if len(args.files) == 0:
+    parser.print_help()
+    exit()
+
 for f in args.files:
-    print "Searching %s using %s plugin." % (f, args.type) 
-    plugin = carver.getPlugin(args.type)
-    if plugin == None:
-        print "Unsupported plugin: %s" % args.type
-        exit()
-    (headers, records) = plugin.searchFile(f)
-    for r in records:
-        r.printRecord()
+    print "Searching: %s" % os.path.abspath(f)
+    print "Plugins:",
+    for t in args.type:
+        print t, 
+
+    for t in args.type:
+        plugin = carver_lib.getPlugin(t)
+        if plugin == None:
+            print "Unsupported plugin: %s" % args.type
+            exit()
+        (headers, records) = plugin.searchFile(f, verbose=True)
+        for r in records:
+            r.printRecord()
+
 

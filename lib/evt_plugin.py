@@ -27,145 +27,149 @@ import evt_header
 import evt_record
 from evt_record import *
 
+name = "evt"
+
 class EvtPlugin(plugin.Plugin):
-    """A carver plugin for reading Windows Event Log Files"""
-    _name = "evt"
-    #_bs = pass          # ConstBitStream for scanning unalloc space
-    _headers = []       # A list of EVT headers found
-    _records = []       # A list of the EVT records found
+     """A carver plugin for reading Windows Event Log Files"""
+_headers = []       # A list of EVT headers found
+_records = []       # A list of the EVT records found
 
-    def searchFile(self, dataFile):
-        """Search data for EVT log files. Return a tuple off header lists and
-       record lists"""
-        #TODO: check return of open()
-        _bs = ConstBitStream(filename=dataFile)
+def printPluginHeader(self):
+    """Print a banner designating the EVT plugin"""
+    print "*****"
+    print "EVT: Searching for %s" % evt_header.MagicString
+    print
 
-        print "Searching for %s." % evt_header.MagicString
+def searchFile(self, dataFile, verbose=False):
+    """Search data for EVT log files. Return a tuple of \
+    header lists and record lists"""
+    printPluginHeader()
 
-        i = 0
-        # Find all occurrences of the magic string
-        found = _bs.findall(evt_header.MagicString, bytealigned=False)
-        for idx in found:
-            _bs.pos = idx
-            r = EvtRecord()
-            r.setPosition(_bs.pos)
+    _bs = ConstBitStream(filename=dataFile)
 
-            # Message length
-            readBits = 32
-            lenIdx = idx - readBits     # Set stream position to idx of length
-            _bs.pos = lenIdx
-            recordLength = _bs.read(readBits).uintle
-            r.setField("length", recordLength)
+    i = 0
+    # Find all occurrences of the magic string
+    found = _bs.findall(evt_header.MagicString, bytealigned=False)
+    for idx in found:
+        _bs.pos = idx
+        r = EvtRecord()
+        r.setPosition(_bs.pos)
 
-            # Calculate size of variable data at end of record 
-            varDataSize = evt_record.FixedSize - recordLength 
-            # When reading the size in a header
-            if varDataSize < 0:
-                varDataSize = 0
+        # Message length
+        readBits = 32
+        lenIdx = idx - readBits     # Set position to idx of length
+        _bs.pos = lenIdx
+        recordLength = _bs.read(readBits).uintle
+        r.setField("length", recordLength)
 
-            # Reset stream position
-            _bs.pos = idx
+        # Calculate size of variable data at end of record 
+        varDataSize = evt_record.FixedSize - recordLength 
+        # When reading the size in a header
+        if varDataSize < 0: 
+            varDataSize = 0
 
-            # Message separator
-            readBits = 32
-            sep = _bs.read(readBits).uint
-            r.setField("reserved", sep)
+        # Reset stream position
+        _bs.pos = idx
 
-            # Record number
-            readBits = 32
-            recordNum = _bs.read(readBits).uintle
-            r.setField("recordNumber", recordNum)
+        # Message separator
+        readBits = 32
+        sep = _bs.read(readBits).uint
+        r.setField("reserved", sep)
 
-            # Date created
-            readBits = 32
-            created = _bs.read(readBits).uintle
-            r.setField("timeGenerated", time.ctime(created))
+        # Record number
+        readBits = 32
+        recordNum = _bs.read(readBits).uintle
+        r.setField("recordNumber", recordNum)
 
-            # Date written
-            readBits = 32
-            written = _bs.read(readBits).uintle
-            r.setField("timeWritten", time.ctime(written))
+        # Date created
+        readBits = 32
+        created = _bs.read(readBits).uintle
+        r.setField("timeGenerated", time.ctime(created))
 
-            # Event ID
-            #readBits = 32
-            readBits = 16
-            eventID = _bs.read(readBits).uintle
-            r.setField("eventID", eventID)
+        # Date written
+        readBits = 32
+        written = _bs.read(readBits).uintle
+        r.setField("timeWritten", time.ctime(written))
+
+        # Event ID
+        #readBits = 32
+        readBits = 16
+        eventID = _bs.read(readBits).uintle
+        r.setField("eventID", eventID)
          
-            # Event RVA offset
-            readBits = 16
-            eventRVA = _bs.read(readBits).uintle
-            r.setField("eventRVA", eventRVA)
+        # Event RVA offset
+        readBits = 16
+        eventRVA = _bs.read(readBits).uintle
+        r.setField("eventRVA", eventRVA)
 
-            # Event type
-            readBits = 16
-            eventType = _bs.read(readBits).uint
-            r.setField("eventType", eventType)
+        # Event type
+        readBits = 16
+        eventType = _bs.read(readBits).uint
+        r.setField("eventType", eventType)
 
-            # Num strings
-            readBits = 16
-            numStrings = _bs.read(readBits).uint
-            r.setField("numStrings", numStrings)
+        # Num strings
+        readBits = 16
+        numStrings = _bs.read(readBits).uint
+        r.setField("numStrings", numStrings)
 
-            # Category
-            readBits = 16
-            category = _bs.read(readBits).uint
-            r.setField("eventCategory", category)
+        # Category
+        readBits = 16
+        category = _bs.read(readBits).uint
+        r.setField("eventCategory", category)
 
-            # Reserved flags 
-            readBits = 16
-            flags = _bs.read(readBits).uint
-            r.setField("reservedFlags", flags)
+        # Reserved flags 
+        readBits = 16
+        flags = _bs.read(readBits).uint
+        r.setField("reservedFlags", flags)
 
-            # Closing record number
-            readBits = 32
-            #readBits = 16
-            recordNum = _bs.read(readBits).uint
-            r.setField("closingRecordNumber", recordNum)
+        # Closing record number
+        readBits = 32
+        #readBits = 16
+        recordNum = _bs.read(readBits).uint
+        r.setField("closingRecordNumber", recordNum)
 
-            # String offset
-            readBits = 32
-            stringOffset = _bs.read(readBits).uint
-            r.setField("stringOffset", stringOffset)
+        # String offset
+        readBits = 32
+        stringOffset = _bs.read(readBits).uint
+        r.setField("stringOffset", stringOffset)
 
-            # User SID length
-            readBits = 32
-            sidLength = _bs.read(readBits).uint
-            r.setField("userSidLength", sidLength)
+        # User SID length
+        readBits = 32
+        sidLength = _bs.read(readBits).uint
+        r.setField("userSidLength", sidLength)
 
-            # User SID offset
-            readBits = 32
-            sidOffset = _bs.read(readBits).uint
-            r.setField("userSidOffset", sidOffset)
+        # User SID offset
+        readBits = 32
+        sidOffset = _bs.read(readBits).uint
+        r.setField("userSidOffset", sidOffset)
 
-            # Data length
-            readBits = 32
-            dataLength = _bs.read(readBits).uint
-            r.setField("dataLength", dataLength)
+        # Data length
+        readBits = 32
+        dataLength = _bs.read(readBits).uint
+        r.setField("dataLength", dataLength)
 
-            # Data offset
-            readBits = 32
-            dataOffset = _bs.read(readBits).uint
-            r.setField("dataOffset", dataOffset)
+        # Data offset
+        readBits = 32
+        dataOffset = _bs.read(readBits).uint
+        r.setField("dataOffset", dataOffset)
 
-            # Variable data
-            readBits = varDataSize
-            varData = _bs.read(readBits).bytes
-            r.setField("varData", varData)
+        # Variable data
+        readBits = varDataSize
+        varData = _bs.read(readBits).bytes
+        r.setField("varData", varData)
 
-            #r.printRecord()
-            #print
-            rec = copy.copy(r)
-            self._records.append(rec)
-        return (self._headers, self._records)
+        rec = copy.copy(r)
+        self._records.append(rec)
 
-    def parseLog(self, log):
-        """Parse an EVT log file. Return an EvtLog object."""
-        return 0
+    if (verbose):
+        print "Found %d headers, %d records." % len(self._headers), \
+            len(self._records)
+    return (self._headers, self._records)
 
-    def exportCSV(self, log, csvFile):
-        """Export an EVT log to a CSV file. Returns the number of bytes written."""
-        return 0
+def parseLog(self, log):
+    """Parse an EVT log file. Return an EvtLog object."""
+    return 0
 
-    def getName(self):
-        return _name
+def exportCSV(self, log, csvFile):
+    """Export an EVT log to a CSV file. Returns the number of bytes written."""
+    return 0
