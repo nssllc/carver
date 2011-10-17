@@ -21,6 +21,7 @@
 
 import evt_header
 import evt_plugin
+import string
 
 # Fixed record size
 FixedSize = 0x38
@@ -78,26 +79,44 @@ class EvtRecord:
 
     def printRecord(self):
         """Print this record in a human-readable format."""
-        print "Length: %d" % self._fields["length"] 
-        print "Reserved: %s" % self._fields["reserved"]
-        print "Record Number: %d" % self._fields["recordNumber"]
-        print "Time Generated: %s" % \
-            self._fields["timeGenerated"]
-        print "Time Written: %s" % \
-            self._fields["timeWritten"]
-        print "Event ID: %d" % self._fields["eventID"]
-        print "Event RVA Offset: %d" % self._fields["eventRVA"]
-        print "Event Type: %d" % self._fields["eventType"]
-        print "Number of Strings: %d" % self._fields["numStrings"]
-        print "Event Category: %d" % self._fields["eventCategory"]
-        print "Reserved Flags: %d" % self._fields["reservedFlags"]
-        print "Closing Record Number: %d" % \
-            self._fields["closingRecordNumber"]
-        print "String Offset: %d" % self._fields["stringOffset"]
-        print "SID Length: %d" % self._fields["userSidLength"]
-        print "SID Offset: %d" % self._fields["userSidOffset"]
-        print "Data Length: %d" % self._fields["dataLength"]
-        print "Data Offset: %d" % self._fields["dataOffset"]
-        print "Variable Data: %s" % self._fields["varData"]
+        # Length of longest field name (FIXME)
+        c1 = len("Event RVA Offset:")
+
+        print string.ljust("Length:", c1),
+        print self._fields["length"]
+        print string.ljust("Reserved:", c1),
+        print self._fields["reserved"]
+        print string.ljust("Record #:", c1),
+        print self._fields["recordNumber"]
+        print string.ljust("Time Generated:", c1),
+        print self._fields["timeGenerated"]
+        print string.ljust("Time Written:", c1),
+        print self._fields["timeWritten"]
+        print string.ljust("Event ID:", c1),
+        print self._fields["eventID"]
+        print string.ljust("Event RVA Offset:", c1),
+        print self._fields["eventRVA"]
+        print string.ljust("Event Type:", c1),
+        print self._fields["eventType"]
+        print string.ljust("# of Strings:", c1),
+        print self._fields["numStrings"]
+        print string.ljust("Event Category:", c1),
+        print self._fields["eventCategory"]
+        print string.ljust("Reserved Flags:", c1),
+        print self._fields["reservedFlags"]
+        print string.ljust("Closing Record #:", c1),
+        print self._fields["closingRecordNumber"]
+        print string.ljust("String Offset:", c1),
+        print self._fields["stringOffset"]
+        print string.ljust("SID Length:", c1),
+        print self._fields["userSidLength"]
+        print string.ljust("SID Offset:", c1),
+        print self._fields["userSidOffset"]
+        print string.ljust("Data Length:", c1),
+        print self._fields["dataLength"]
+        print string.ljust("Data Offset:", c1),
+        print self._fields["dataOffset"]
+        print string.ljust("Variable Data:", c1),
+        print self._fields["varData"]
         
 

@@ -61,7 +61,8 @@ for f in args.files:
     print "Searching: %s" % os.path.abspath(f)
     print "Plugins:",
     for t in args.type:
-        print t, 
+        print t,
+    print "\n"
 
     for t in args.type:
         plugin = carver_lib.getPlugin(t)
@@ -70,6 +71,7 @@ for f in args.files:
             exit()
         (headers, records) = plugin.searchFile(f, verbose=True)
         for r in records:
+            print
             r.printRecord()
 
 
