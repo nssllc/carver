@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+#!/usr/bin/python
 import binascii
 import re
 import datetime
@@ -72,8 +71,6 @@ for filename in fullfilelist:
 
 
     for item in eventslist:
-        #XX: How can ClosingRecordNumber (11th item) be 16 bits 
-        #    when RecordNumber (3rd item) is 32 bits?
         matchline = '(.{,8})(4c664c65)(.{,8})(.{,8})(.{,8})(.{,4})(.{,4})(.{,4})(.{,4})(.{,4})(.{,4})(.{,8})(.{,8})(.{,8})(.{,8})(.{,8})(.{,8})(.*)'
         match = re.search(matchline,item)
 
