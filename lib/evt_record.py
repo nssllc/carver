@@ -22,6 +22,7 @@
 import evt_header
 import evt_plugin
 import string
+import time
 
 # Fixed record size
 FixedSize = 0x38
@@ -89,9 +90,9 @@ class EvtRecord:
         print string.ljust("Record #:", c1),
         print self._fields["recordNumber"]
         print string.ljust("Time Generated:", c1),
-        print self._fields["timeGenerated"]
+        print time.ctime(self._fields["timeGenerated"])
         print string.ljust("Time Written:", c1),
-        print self._fields["timeWritten"]
+        print time.ctime(self._fields["timeWritten"])
         print string.ljust("Event ID:", c1),
         print self._fields["eventID"]
         print string.ljust("Event RVA Offset:", c1),

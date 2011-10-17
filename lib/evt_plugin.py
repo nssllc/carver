@@ -22,28 +22,64 @@
 from bitstring import ConstBitStream
 import copy
 import plugin
-import time
+import os
+import sys
 import evt_header
 import evt_record
 from evt_record import *
 
 name = "evt"
+desc = "Windows XP/2003 Event Log Plugin"
+version = "1.0"
 
 class EvtPlugin(plugin.Plugin):
     """A carver plugin for reading Windows Event Log Files"""
-    _headers = []       # A list of EVT headers found
-    _records = []       # A list of the EVT records found
+    def __init__(self):
+        self._headers = []  # List of the headers found
+        self._records = []  # List of the records found
 
     def printPluginHeader(self):
         """Print a banner designating the EVT plugin"""
-        print "*****"
-        print "EVT: Searching for %s" % evt_header.MagicString
-        print
+        print "%s, version %s" % (desc, version)
 
+    def sortByTimeGenerated(self, records, verbose=False, in_place=False):
+        """Sort records by time generated.  Performs bubble sort."""
+        tmp = records
+        if (verbose):
+            print "[EVT] Sorting by time generated"
+
+        for i in range(len(tmp)):
+            for j in range(len(tmp)):
+                ni = tmp[i].getField("timeGenerated")
+                nj = tmp[j].getField("timeGenerated")
+                if nj > ni:
+                    t = tmp[j]
+                    tmp[j] = tmp[i]
+                    tmp[i] = t
+        return tmp
+
+    def sortByRecordNum(self, records, verbose=False, in_place=False):
+        """Sort records by record number.  Performs bubble sort."""
+        tmp = records    # copy of records for sorting
+        if (verbose):
+            print "[EVT] Sorting by record number"
+
+        for i in range(len(tmp)):
+            for j in range(len(tmp)):
+                ni = tmp[i].getField("recordNumber")
+                nj = tmp[j].getField("recordNumber")
+                if tmp[j] > tmp[i]:
+                    t = tmp[j]
+                    tmp[j] = tmp[i]
+                    tmp[i] = t
+        return tmp
+                
     def searchFile(self, dataFile, verbose=False):
         """Search data for EVT log files. Return a tuple of \
         header lists and record lists"""
-        self.printPluginHeader()
+        if (verbose):
+            self.printPluginHeader()
+            print "[EVT] Searching %s" % os.path.abspath(dataFile)
 
         _bs = ConstBitStream(filename=dataFile)
 
@@ -84,12 +120,12 @@ class EvtPlugin(plugin.Plugin):
             # Date created
             readBits = 32
             created = _bs.read(readBits).uintle
-            r.setField("timeGenerated", time.ctime(created))
+            r.setField("timeGenerated", created)
 
             # Date written
             readBits = 32
             written = _bs.read(readBits).uintle
-            r.setField("timeWritten", time.ctime(written))
+            r.setField("timeWritten", written)
 
             # Event ID
             #readBits = 32
@@ -162,7 +198,7 @@ class EvtPlugin(plugin.Plugin):
             self._records.append(rec)
 
         if (verbose):
-            print "Found %d headers, %d records." % (len(self._headers), \
+            print "[EVT] Found %d headers, %d records" % (len(self._headers), \
                 len(self._records))
         return (self._headers, self._records)
 

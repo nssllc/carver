@@ -28,6 +28,7 @@ sys.path.append(abspath + "/../lib")
 import carver_lib
 import argparse
 import plugin
+import string
 from evt_plugin import EvtPlugin
 
 parser = argparse.ArgumentParser(description="Find forensics data.")
@@ -37,9 +38,17 @@ parser.add_argument("-t", "--type", action="append", \
     help="type of data to be carved")
 parser.add_argument("--list-types", action="store_true", \
     help="list supported data types")
-parser.add_argument("--version", "-V", action="version", \
+parser.add_argument("-v", "--verbose", action="store_true", \
+    help="verbose output")
+parser.add_argument("-V", "--version", action="version", \
     version="%(prog)s " + carver_lib.version, \
     help="print version information")
+
+# EVT arguments
+parser.add_argument("-s", "--sort-record-num", \
+    action="store_true", help="sort records by record number")
+parser.add_argument("-g", "--sort-time-generated", \
+    action="store_true", help="sort records by time generated")
 
 args = parser.parse_args()
 
@@ -58,20 +67,34 @@ if len(args.files) == 0:
     exit()
 
 for f in args.files:
-    print "Searching: %s" % os.path.abspath(f)
-    print "Plugins:",
-    for t in args.type:
-        print t,
-    print "\n"
+    if (args.verbose):
+        c1 = len("Searching:")
+        print string.ljust("Searching:", c1),
+        print os.path.abspath(f)
+        print string.ljust("Plugins:", c1),
+        for t in args.type:
+            print t,
+        print "\n"
 
     for t in args.type:
         plugin = carver_lib.getPlugin(t)
         if plugin == None:
             print "Unsupported plugin: %s" % args.type
             exit()
-        (headers, records) = plugin.searchFile(f, verbose=True)
-        for r in records:
+       
+        (headers, records) = plugin.searchFile(f, verbose=args.verbose)
+        sortedRecords = records
+
+        # Sort records by record number
+        if (args.sort_record_num):
+            sortedRecords = \
+                plugin.sortByRecordNum(records, args.verbose)
+
+        # Sort records by time generated
+        if (args.sort_time_generated):
+            sortedRecords = \
+                plugin.sortByTimeGenerated(records, args.verbose)
+
+        for r in sortedRecords:
             print
             r.printRecord()
-
-
