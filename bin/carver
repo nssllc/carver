@@ -45,7 +45,7 @@ parser.add_argument("-V", "--version", action="version", \
     help="print version information")
 
 # EVT arguments
-parser.add_argument("-s", "--sort-record-num", \
+parser.add_argument("-n", "--sort-record-num", \
     action="store_true", help="sort records by record number")
 parser.add_argument("-g", "--sort-time-generated", \
     action="store_true", help="sort records by time generated")
