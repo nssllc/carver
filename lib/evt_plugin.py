@@ -30,7 +30,7 @@ from evt_record import *
 
 name = "evt"
 desc = "Windows XP/2003 Event Log Plugin"
-version = "1.0"
+version = "1.1"
 
 class EvtPlugin(plugin.Plugin):
     """A carver plugin for reading Windows Event Log Files"""
