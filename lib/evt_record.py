@@ -27,28 +27,30 @@ FixedSize = 0x38
 
 class EvtRecord:
     """Definition of a single record from a Windows Event Log"""
-    _pos = 0        # Position in bytestream of this record
-    _fields = {}
 
-    # Fields of each EVT record
-    _fields["length"] = ""
-    _fields["reserved"] = evt_header.MagicString
-    _fields["recordNumber"] = ""
-    _fields["timeGenerated"] = ""
-    _fields["timeWritten"] = ""
-    _fields["eventID"] = ""
-    _fields["eventRVA"] = ""
-    _fields["eventType"] = "" 
-    _fields["numStrings"] = ""
-    _fields["eventCategory"] = ""
-    _fields["reservedFlags"] = ""
-    _fields["closingRecordNumber"] = ""
-    _fields["stringOffset"] = ""
-    _fields["userSidLength"] = ""
-    _fields["userSidOffset"] = ""
-    _fields["dataLength"] = ""
-    _fields["dataOffset"] = ""
-    _fields["varData"] = ""
+    def __init__(self):
+        self._pos = 0        # Position in bytestream of this record
+        self._fields = {}
+
+        # Fields of each EVT record
+        self._fields["length"] = ""
+        self._fields["reserved"] = evt_header.MagicString
+        self._fields["recordNumber"] = ""
+        self._fields["timeGenerated"] = ""
+        self._fields["timeWritten"] = ""
+        self._fields["eventID"] = ""
+        self._fields["eventRVA"] = ""
+        self._fields["eventType"] = "" 
+        self._fields["numStrings"] = ""
+        self._fields["eventCategory"] = ""
+        self._fields["reservedFlags"] = ""
+        self._fields["closingRecordNumber"] = ""
+        self._fields["stringOffset"] = ""
+        self._fields["userSidLength"] = ""
+        self._fields["userSidOffset"] = ""
+        self._fields["dataLength"] = ""
+        self._fields["dataOffset"] = ""
+        self._fields["varData"] = ""
 
     def setPosition(self, pos):
         """Set the value of this record's position"""

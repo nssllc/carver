@@ -20,6 +20,7 @@
 #
 
 from bitstring import *
+import copy
 import plugin
 import time
 import evt_header
@@ -46,8 +47,7 @@ class EvtPlugin(plugin.Plugin):
         found = _bs.findall(evt_header.MagicString, bytealigned=False)
         for idx in found:
             _bs.pos = idx
-            self._records.append(EvtRecord())
-            r = self._records[i]
+            r = EvtRecord()
             r.setPosition(_bs.pos)
 
             # Message length
@@ -55,7 +55,6 @@ class EvtPlugin(plugin.Plugin):
             lenIdx = idx - readBits     # Set stream position to idx of length
             _bs.pos = lenIdx
             recordLength = _bs.read(readBits).uintle
-            self._records[i].setField("length", recordLength)
             r.setField("length", recordLength)
 
             # Calculate size of variable data at end of record 
@@ -154,9 +153,10 @@ class EvtPlugin(plugin.Plugin):
             varData = _bs.read(readBits).bytes
             r.setField("varData", varData)
 
-            i += 1
-            r.printRecord()
-            print
+            #r.printRecord()
+            #print
+            rec = copy.copy(r)
+            self._records.append(rec)
         return (self._headers, self._records)
 
     def parseLog(self, log):

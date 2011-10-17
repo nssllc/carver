@@ -27,11 +27,6 @@ import evt_record
 evt = EvtPlugin()
 (headers, records) = evt.searchFile("../var/AppEvent.Evt")
 
-n = 0
 for r in records:
-    n += 1
-print "Found " + str(n) + " EVT records."
-
-#for r in records:
-#    r.printRecord()
-#    print
+    r.printRecord()
+    print

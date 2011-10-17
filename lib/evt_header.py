@@ -32,31 +32,33 @@ magic["endHeaderSize"] = "0x30"
 
 class EvtHeader:
     """Internal representation of an EVT log header"""
-    _fields = {}
-    _fields["headerSize"] = magic["headerSize"]
-    _fields["signature"] = magic["signature"]
-    _fields["majorVersion"] = magic["majorVersion"]
-    _fields["minorVersion"] = magic["minorVersion"]
-    _fields["startOffset"] = ""
-    _fields["endOffset"] = ""
-    _fields["currentRecordNum"] = ""
-    _fields["oldestRecordNum"] = ""
-    _fields["maxSize"] = ""
-    _fields["flags"] = ""
-    _fields["retention"] = ""
-    _fields["endHeaderSize"] = magic["endHeaderSize"]
+
+    def __init__(self):
+        self._fields = {}
+        self._fields["headerSize"] = magic["headerSize"]
+        self._fields["signature"] = magic["signature"]
+        self._fields["majorVersion"] = magic["majorVersion"]
+        self._fields["minorVersion"] = magic["minorVersion"]
+        self._fields["startOffset"] = ""
+        self._fields["endOffset"] = ""
+        self._fields["currentRecordNum"] = ""
+        self._fields["oldestRecordNum"] = ""
+        self._fields["maxSize"] = ""
+        self._fields["flags"] = ""
+        self._fields["retention"] = ""
+        self._fields["endHeaderSize"] = magic["endHeaderSize"]
 
     def getField(self, key):
-        if key not in _fields:
+        if key not in self._fields:
             print "Unknown field " + key
             return
-        return _fields[key]
+        return self._fields[key]
 
     def setField(self, key, val):
-        if key not in _fields:
+        if key not in self._fields:
             print "Unknown field " + key
             return
-        _fields[key] = val
+        self._fields[key] = val
 
     
 
