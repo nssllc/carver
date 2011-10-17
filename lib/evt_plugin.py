@@ -19,7 +19,7 @@
 # http://msdn.microsoft.com/en-us/library/windows/desktop/bb309026(v=vs.85).aspx
 #
 
-from bitstring import *
+from bitstring import ConstBitStream
 import copy
 import plugin
 import time
