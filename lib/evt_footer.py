@@ -28,26 +28,28 @@ magic["recordSizeEnd"] = "0x28"
 
 class EvtFooter:
 """Internal representation of an EVT log footer"""
-    _fields["recordSizeBeginning"] = magic["recordSizeBeginning"]
-    _fields["one"] = magic["one"]
-    _fields["two"] = magic["two"]
-    _fields["three"] = magic["three"]
-    _fields["four"] = magic["four"]
-    _fields["beginRecord"] = ""
-    _fields["endRecord"] = ""
-    _fields["currentRecordNum"] = ""
-    _fields["oldestRecordNum"] = ""
-    _fields["recordSizeEnd"] = magic["recordSizeEnd"]
+    def __init__(self):
+        self._fields["recordSizeBeginning"] = \
+            magic["recordSizeBeginning"]
+        self._fields["one"] = magic["one"]
+        self._fields["two"] = magic["two"]
+        self._fields["three"] = magic["three"]
+        self._fields["four"] = magic["four"]
+        self._fields["beginRecord"] = ""
+        self._fields["endRecord"] = ""
+        self._fields["currentRecordNum"] = ""
+        self._fields["oldestRecordNum"] = ""
+        self._fields["recordSizeEnd"] = magic["recordSizeEnd"]
 
     def getField(self, key):
-        if key not in _fields:
+        if key not in self._fields:
             print "Unknown field " + key
             return
-        return _fields[key]
+        return self.fields[key]
 
     def setField(self, key, val):
-        if key not in _fields:
+        if key not in self._fields:
             print "Unknown field " + key
             return
-        _fields[key] = val
+        self._fields[key] = val
 
