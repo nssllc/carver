@@ -38,6 +38,8 @@ parser.add_argument("-t", "--type", action="append", \
     help="type of data to be carved")
 parser.add_argument("--list-types", action="store_true", \
     help="list supported data types")
+parser.add_argument("-c", "--csv", action="store_true", \
+    help="output records as CSV")
 parser.add_argument("-v", "--verbose", action="store_true", \
     help="verbose output")
 parser.add_argument("-V", "--version", action="version", \
@@ -86,15 +88,23 @@ for f in args.files:
         sortedRecords = records
 
         # Sort records by record number
-        if (args.sort_record_num):
+        if args.sort_record_num:
             sortedRecords = \
                 plugin.sortByRecordNum(records, args.verbose)
 
         # Sort records by time generated
-        if (args.sort_time_generated):
+        if args.sort_time_generated:
             sortedRecords = \
                 plugin.sortByTimeGenerated(records, args.verbose)
 
-        for r in sortedRecords:
-            print
-            r.printRecord()
+        # CSV
+        if args.csv:
+            plugin.printCsvHeader()
+            for r in sortedRecords:
+                r.printCsv()
+        else:
+            for r in sortedRecords:
+                print
+                r.printRecord()
+
+        

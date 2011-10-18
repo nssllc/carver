@@ -21,6 +21,8 @@
 
 import evt_header
 import evt_plugin
+import binascii
+import os
 import string
 import time
 
@@ -30,10 +32,20 @@ FixedSize = 0x38
 class EvtRecord:
     """Definition of a single record from a Windows Event Log"""
 
+    EVENTLOG_ERROR_TYPE = "0x0001"
+    EVENTLOG_WARNING_TYPE = "0x0002"
+    EVENTLOG_INFORMATION_TYPE = "0x0004"
+    EVENTLOG_AUDIT_SUCCESS = "0x0008"
+    EVENTLOG_AUDIT_FAILURE = "0x0010"
+
     def __init__(self):
         self._pos = 0        # Position in bytestream of this record
         self._fields = {}
+        self._csv_header_printed = False
 
+        # Path of the file from which this record was carved
+        self._pathname = ""
+    
         # Fields of each EVT record
         self._fields["length"] = ""
         self._fields["reserved"] = evt_header.MagicString
@@ -48,11 +60,35 @@ class EvtRecord:
         self._fields["reservedFlags"] = ""
         self._fields["closingRecordNumber"] = ""
         self._fields["stringOffset"] = ""
+        self._fields["sid"] = ""
         self._fields["userSidLength"] = ""
         self._fields["userSidOffset"] = ""
         self._fields["dataLength"] = ""
         self._fields["dataOffset"] = ""
         self._fields["varData"] = ""
+
+    def parseEventType(self, t):
+        """Return a descriptive string for an EVT event type.\
+           If the event type is undefined, return it as a string."""
+        #print "t: %d" % t
+        #print "et: %d" % int(self.EVENTLOG_ERROR_TYPE, 0)
+        #print "wt: %d" % int(self.EVENTLOG_WARNING_TYPE, 0)
+        #print "ie: %d" % int(self.EVENTLOG_INFORMATION_TYPE, 0)
+        #print "as: %d" % int(self.EVENTLOG_AUDIT_SUCCESS, 0)
+        #print "af: %d" % int(self.EVENTLOG_AUDIT_FAILURE, 0)
+        if t == int(self.EVENTLOG_ERROR_TYPE, 0):
+            desc = "Error event"
+        elif t == int(self.EVENTLOG_WARNING_TYPE, 0):
+            desc = "Warning event"
+        elif t == int(self.EVENTLOG_INFORMATION_TYPE, 0):
+            desc = "Information event"
+        elif t == int(self.EVENTLOG_AUDIT_SUCCESS, 0):
+            desc = "Success Audit event"
+        elif t == int(self.EVENTLOG_AUDIT_FAILURE, 0):
+            desc = "Failure Audit event"
+        else:
+            desc = str(t)
+        return desc
 
     def setPosition(self, pos):
         """Set the value of this record's position"""
@@ -73,6 +109,14 @@ class EvtRecord:
             print "Unknown field " + key
             return
         self._fields[key] = val
+
+    def getPathname(self):
+        """Get the path of the file from which this record was carved"""
+        return self._pathname
+
+    def setPathname(self, path):
+        """Set the path of the file from which this record was carved"""
+        self._pathname = path
 
     def getRecordFields(self):
         """Return a list of the fields defined in this EVT log record"""
@@ -97,8 +141,12 @@ class EvtRecord:
         print self._fields["eventID"]
         print string.ljust("Event RVA Offset:", c1),
         print self._fields["eventRVA"]
+
         print string.ljust("Event Type:", c1),
-        print self._fields["eventType"]
+        desc = self.parseEventType(self._fields["eventType"])
+        print desc
+        #print self._fields["eventType"]
+
         print string.ljust("# of Strings:", c1),
         print self._fields["numStrings"]
         print string.ljust("Event Category:", c1),
@@ -118,6 +166,36 @@ class EvtRecord:
         print string.ljust("Data Offset:", c1),
         print self._fields["dataOffset"]
         print string.ljust("Variable Data:", c1),
-        print self._fields["varData"]
-        
+        print binascii.b2a_qp(self._fields["varData"])
+
+        # Print the SID, if it was defined
+        sid = self.getField("sid")
+        if sid != None:
+            print string.ljust("SID: ", c1),
+            print sid
+
+    def printCsv(self):
+        """Print this record in CSV format."""
+        print os.path.abspath(self.getPathname()) + ",",
+        print str(self.getField("recordNumber")) + ",",
+        print time.ctime(self.getField("timeGenerated")) + ",",
+        print time.ctime(self.getField("timeWritten")) + ",",
+        print str(self.getField("eventCategory")) + ",",
+        print str(self.getField("eventID")) + ",",
+        # TODO: find out the semantics of these fields
+        # SOURCE
+        print ",",
+        # COMPUTER
+        print ",",
+        print self.getField("sid") + ",",
+        print str(self.getField("numStrings")) + ",",
+        print binascii.hexlify(self.getField("varData")) + ",",
+        print binascii.b2a_qp(self.getField("varData"))
+
+    def printCsvHeader(self):
+        """Print the CSV preamble."""
+        print "SOURCE FILENAME, RECORD NUMBER, TIME GEN, TIME WRITE, "\
+            "CATEGORY, EVENTID, SOURCE, COMPUTER, SID, STRINGS, "\
+            "RAW DATA (HEX), DECODED DATA"
+        self._csv_header_printed = True
 

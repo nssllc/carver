@@ -95,6 +95,7 @@ class EvtPlugin(plugin.Plugin):
         for idx in found:
             _bs.pos = idx
             r = EvtRecord()
+            r.setPathname(dataFile)
             r.setPosition(_bs.pos)
 
             # Message length
@@ -146,12 +147,14 @@ class EvtPlugin(plugin.Plugin):
 
             # Event type
             readBits = 16
-            eventType = _bs.read(readBits).uint
+            #eventType = _bs.read(readBits).uint
+            eventType = _bs.read(readBits).uintle
             r.setField("eventType", eventType)
 
             # Num strings
             readBits = 16
-            numStrings = _bs.read(readBits).uint
+            #numStrings = _bs.read(readBits).uint
+            numStrings = _bs.read(readBits).uintle
             r.setField("numStrings", numStrings)
 
             # Category
@@ -200,8 +203,18 @@ class EvtPlugin(plugin.Plugin):
             varData = _bs.read(readBits).bytes
             r.setField("varData", varData)
 
-            rec = copy.copy(r)
-            self._records.append(rec)
+            # SID
+            sidLength = r.getField("userSidLength")
+            if sidLength > 0:
+                sidOffset = r.getField("userSidOffset")
+                if sidOffset <= _bs.length:
+                    _bs.pos = sidOffset
+                    sid = _bs.read(sidLength).uint
+                    r.setField("sid", sid)
+                    #print "SID offset > len."
+                    #print "SID offset: %d" % sidOffset
+                    #print "len: %d" % _bs.length
+            self._records.append(r)
 
         if (verbose):
             print "[EVT] Found %d headers, %d records" % (len(self._headers), \
@@ -211,6 +224,19 @@ class EvtPlugin(plugin.Plugin):
     def parseLog(self, log):
         """Parse an EVT log file. Return an EvtLog object."""
         return 0
+
+    def printCsv(self):
+        """Print a CSV representation of the records found"""
+        self.printCsvHeader()
+        for r in self._records:
+            r.printCsv()
+
+    def printCsvHeader(self):
+        """Print the CSV preamble"""
+        print "SOURCE FILENAME, RECORD NUMBER, TIME GEN, "\
+            "TIME WRITE, CATEGORY, EVENTID, SOURCE, "\
+            "COMPUTER, SID, STRINGS, RAW DATA (HEX), "\
+            "DECODED DATA"
 
     def exportCSV(self, log, csvFile):
         """Export an EVT log to a CSV file. Returns the number of bytes written."""
