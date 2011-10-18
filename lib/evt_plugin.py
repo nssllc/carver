@@ -48,14 +48,17 @@ class EvtPlugin(plugin.Plugin):
         if (verbose):
             print "[EVT] Sorting by time generated"
 
-        for i in range(len(tmp)):
-            for j in range(len(tmp)):
+        swapped = True
+        while swapped:
+            swapped = False
+            for i in xrange(len(tmp)-1):
                 ni = tmp[i].getField("timeGenerated")
-                nj = tmp[j].getField("timeGenerated")
-                if nj > ni:
-                    t = tmp[j]
-                    tmp[j] = tmp[i]
+                nj = tmp[i+1].getField("timeGenerated")
+                if ni > nj:
+                    t = tmp[i+1]
+                    tmp[i+1] = tmp[i]
                     tmp[i] = t
+                    swapped = True
         return tmp
 
     def sortByRecordNum(self, records, verbose=False, in_place=False):
@@ -64,14 +67,17 @@ class EvtPlugin(plugin.Plugin):
         if (verbose):
             print "[EVT] Sorting by record number"
 
-        for i in range(len(tmp)):
-            for j in range(len(tmp)):
+        swapped = True
+        while swapped:
+            swapped = False
+            for i in xrange(len(tmp)-1):
                 ni = tmp[i].getField("recordNumber")
-                nj = tmp[j].getField("recordNumber")
-                if tmp[j] > tmp[i]:
-                    t = tmp[j]
-                    tmp[j] = tmp[i]
+                nj = tmp[i+1].getField("recordNumber")
+                if ni > nj:
+                    t = tmp[i+1]
+                    tmp[i+1] = tmp[i]
                     tmp[i] = t
+                    swapped = True
         return tmp
                 
     def searchFile(self, dataFile, verbose=False):

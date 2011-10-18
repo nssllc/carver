@@ -23,6 +23,7 @@ import sys
 moduleDir = os.path.dirname(__file__)
 sys.path.append(os.path.abspath(moduleDir))
 
+import argparse
 import bitstring
 import plugin
 import evt_plugin
