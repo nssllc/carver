@@ -18,9 +18,10 @@
 #
 
 class Plugin:
-    _name = ""          # Short name used to identify this plugin 
-    #_file = pass
-    _maxBufferSize = 1024 * 1024 * 100  # 100 MB limit on buffer sizes
+    """Base class for data format plugins"""
+    def __init__(self):
+        self._name = ""     # Short name used to identify this plugin 
+        self._maxBufferSize = 1024 * 1024 * 100     # 100 MB limit 
 
     def search(self, data):
         """Search data for log files.  Return a list EvtLog objects."""
@@ -34,4 +35,4 @@ class Plugin:
         """Export a log file to a CSV file"""
 
     def getMaxBufferSize(self):
-        return _maxBufferSize
+        return self._maxBufferSize

@@ -32,7 +32,6 @@ magic["endHeaderSize"] = "0x30"
 
 class EvtHeader:
     """Internal representation of an EVT log header"""
-
     def __init__(self):
         self._fields = {}
         self._fields["headerSize"] = magic["headerSize"]
