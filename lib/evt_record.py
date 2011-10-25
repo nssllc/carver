@@ -45,6 +45,9 @@ class EvtRecord:
 
         # Path of the file from which this record was carved
         self._pathname = ""
+
+        # Size of the record's variable-length data field
+        self._var_data_size = 0
     
         # Fields of each EVT record
         self._fields["length"] = ""
@@ -67,15 +70,22 @@ class EvtRecord:
         self._fields["dataOffset"] = ""
         self._fields["varData"] = ""
 
+    def removeNonAscii(self, k):
+        list1 = []
+        result = ""
+        for char in k:
+            if char == "=" or char == "0":
+                list1.append("")
+            elif ord(char) < 32 or ord(char) > 127:
+                list1.append('#')
+            else:
+                list1.append(char)
+            result = ''.join(list1)
+        return result
+
     def parseEventType(self, t):
         """Return a descriptive string for an EVT event type.\
            If the event type is undefined, return it as a string."""
-        #print "t: %d" % t
-        #print "et: %d" % int(self.EVENTLOG_ERROR_TYPE, 0)
-        #print "wt: %d" % int(self.EVENTLOG_WARNING_TYPE, 0)
-        #print "ie: %d" % int(self.EVENTLOG_INFORMATION_TYPE, 0)
-        #print "as: %d" % int(self.EVENTLOG_AUDIT_SUCCESS, 0)
-        #print "af: %d" % int(self.EVENTLOG_AUDIT_FAILURE, 0)
         if t == int(self.EVENTLOG_ERROR_TYPE, 0):
             desc = "Error event"
         elif t == int(self.EVENTLOG_WARNING_TYPE, 0):
@@ -117,6 +127,14 @@ class EvtRecord:
     def setPathname(self, path):
         """Set the path of the file from which this record was carved"""
         self._pathname = path
+
+    def getVarDataSize(self):
+        """Get the size (in bytes) of this record's data field"""
+        return self._var_data_size
+
+    def setVarDataSize(self, size):
+        """Set the size of this record's data field"""
+        self._var_data_size = size
 
     def getRecordFields(self):
         """Return a list of the fields defined in this EVT log record"""
@@ -165,8 +183,11 @@ class EvtRecord:
         print self._fields["dataLength"]
         print string.ljust("Data Offset:", c1),
         print self._fields["dataOffset"]
+        print string.ljust("VarData Size:", c1),
+        print self.getVarDataSize()
         print string.ljust("Variable Data:", c1),
-        print binascii.b2a_qp(self._fields["varData"])
+        raw = binascii.b2a_qp(self._fields["varData"])
+        print self.removeNonAscii(raw)
 
         # Print the SID, if it was defined
         sid = self.getField("sid")
@@ -190,7 +211,8 @@ class EvtRecord:
         print self.getField("sid") + ",",
         print str(self.getField("numStrings")) + ",",
         print binascii.hexlify(self.getField("varData")) + ",",
-        print binascii.b2a_qp(self.getField("varData"))
+        raw = binascii.b2a_qp(self.getField("varData"))
+        print self.removeNonAscii(raw)
 
     def printCsvHeader(self):
         """Print the CSV preamble."""
