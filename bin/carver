@@ -23,7 +23,8 @@ import sys
 # Compute absolute path for import purposes
 path = os.path.dirname(sys.argv[0])
 abspath = os.path.abspath(path)
-sys.path.append(abspath + "/../lib")
+sys.path.append(abspath + "/../lib/")
+sys.path.append(abspath + "/../lib/carver/")
 
 import carver_lib
 import argparse
