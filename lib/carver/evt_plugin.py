@@ -36,8 +36,8 @@ version = "1.2"
 class EvtPlugin(plugin.Plugin):
     """A carver plugin for reading Windows Event Log Files"""
 
-    max_buf_bytes = 9 * 1024 * 1024   # size limit on buffers
-    ERROR_END_OF_STREAM = -1    # End of bitstream error constant
+    max_buf_bytes = 500 * 1024 * 1024   # size limit on buffers
+    ERROR_END_OF_STREAM = -1            # End of bitstream error constant
 
     def __init__(self):
         self._headers = []  # List of the headers found

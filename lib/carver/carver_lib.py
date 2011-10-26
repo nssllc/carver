@@ -20,10 +20,11 @@
 # Append the plugin dir to the module search path 
 import os
 import sys
-moduleDir = os.path.dirname(__file__ + "../")
-sys.path.append(os.path.abspath(moduleDir + "/"))
-sys.path.append(os.path.abspath(moduleDir + "argparse/"))
-sys.path.append(os.path.abspath(moduleDir + "bitstring/"))
+moduleDir = os.path.dirname(__file__) + "/../"
+sys.path.append(os.path.abspath(moduleDir))
+sys.path.append(os.path.abspath(moduleDir + "/argparse/"))
+sys.path.append(os.path.abspath(moduleDir + "/bitstring/"))
+sys.path.append(os.path.abspath(moduleDir + "/carver/"))
 
 import argparse
 import bitstring

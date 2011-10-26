@@ -210,7 +210,7 @@ class EvtRecord:
         print ",",
         print self.getField("sid") + ",",
         print str(self.getField("numStrings")) + ",",
-        print binascii.hexlify(self.getField("varData")) + ",",
+        #print binascii.hexlify(self.getField("varData")) + ",",
         raw = binascii.b2a_qp(self.getField("varData"))
         print self.removeNonAscii(raw)
 

@@ -1575,9 +1575,6 @@ class Bits(object):
 
     def _readtoken(self, name, pos, length):
         """Reads a token from the bitstring and returns the result."""
-        print "_readtoken: self.length: %d" % self.length
-        print "_readtoken: pos: %d" % pos
-        print "_readtoken: int(length): %d" % int(length)
         if length is not None and int(length) > self.length - pos:
             raise bitstring.ReadError("Reading off the end of the data.")
         try:
