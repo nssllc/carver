@@ -28,6 +28,7 @@ import sys
 import evt_header
 import evt_record
 from evt_record import *
+import binascii
 
 name = "evt"
 desc = "Windows XP/2003 Event Log Plugin"
@@ -96,7 +97,7 @@ class EvtPlugin(plugin.Plugin):
         if verbose:
             print "[EVT] %s: size = %d bytes" % \
                 (os.path.basename(dataFile), file_bytes)
-    
+   
         # Split dataFile into manageable chunks if it is too big
         if file_bytes > self.max_buf_bytes:
             pass_bytes = self.max_buf_bytes   # Bytes to read this pass
@@ -112,8 +113,11 @@ class EvtPlugin(plugin.Plugin):
 
                 # Read pass_bytes and pass it to carve()
                 f = open(dataFile, "r")
-                f.seek(read_bytes)  # offset = bytes read so far 
-                print "Reading %d bytes from %s.." % (pass_bytes, dataFile)
+                f.seek(read_bytes, 0)  # offset = bytes read so far 
+                if verbose:
+                    print "[EVT] Input file: %s" % dataFile
+                    print "[EVT] Offset: %d bytes" % f.tell() 
+                    print "[EVT] Reading: %d bits" % pass_bytes
                 rbytes = f.read(pass_bytes)
                 _bs = ConstBitStream(bytes=rbytes)
                 (headers, records) = self.carve(_bs, dataFile, verbose)
@@ -140,10 +144,13 @@ class EvtPlugin(plugin.Plugin):
     def carveField(self, bs, name, data_type, size, verbose):
         if size + bs.pos > bs.len:
             if verbose:
-                print "[EVT] Unable to read field %s: "\
-                    "end of stream reached" % name
-            return self.ERROR_END_OF_STREAM
-        data = bs.read(data_type + ":" + str(size))
+                print "[EVT] Truncating field %s from %d bits to "\
+                    "%d bits." % (name, size, (bs.len-bs.pos))
+            size = bs.len - bs.pos           
+        try:
+            data = bs.read(data_type + ":" + str(size))
+        except bitstring.ReadError:
+            pass
         return data
 
     def carve(self, bs, dataFile, verbose=False):
@@ -159,6 +166,7 @@ class EvtPlugin(plugin.Plugin):
         readSoFarBits = 0
         for idx in found:
             _bs.pos = idx
+            record_offset = 0
             r = EvtRecord()
             r.setPathname(dataFile)
             r.setPosition(_bs.pos)
@@ -175,7 +183,7 @@ class EvtPlugin(plugin.Plugin):
             _bs.pos = lenIdx
             recordLength = _bs.read(fieldBits).uintle
             r.setField("length", recordLength)
-            readSoFarBits += fieldBits
+            record_offset += fieldBits  # Increment record offset 
 
             # Calculate size of variable data at end of record 
             varDataSize = evt_record.FixedSize - recordLength 
@@ -194,6 +202,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("reserved", data)
+            record_offset += fieldBits
 
             # Record number
             fieldBits = 32 
@@ -202,6 +211,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("recordNumber", data)
+            record_offset += fieldBits
 
             # Date created
             fieldBits = 32 
@@ -210,6 +220,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("timeGenerated", data)
+            record_offset += fieldBits
 
             # Date written
             fieldBits = 32 
@@ -218,6 +229,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("timeWritten", data)
+            record_offset += fieldBits
 
             # Event ID
             fieldBits = 16 
@@ -226,6 +238,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("eventID", data)
+            record_offset += fieldBits
          
             # Event RVA offset
             fieldBits = 16 
@@ -234,6 +247,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("eventRVA", data)
+            record_offset += fieldBits
 
             # Event type
             fieldBits = 16 
@@ -242,6 +256,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("eventType", data)
+            record_offset += fieldBits
 
             # Num strings
             fieldBits = 16 
@@ -250,6 +265,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("numStrings", data)
+            record_offset += fieldBits
 
             # Category
             fieldBits = 16 
@@ -258,6 +274,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("eventCategory", data)
+            record_offset += fieldBits
 
             # Reserved flags 
             fieldBits = 16 
@@ -266,6 +283,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("reservedFlags", data)
+            record_offset += fieldBits
 
             # Closing record number
             fieldBits = 32 
@@ -274,14 +292,16 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("closingRecordNumber", data)
+            record_offset += fieldBits
 
             # String offset
             fieldBits = 32 
-            data = self.carveField(_bs, "stringOffset", "uint",\
+            data = self.carveField(_bs, "stringOffset", "uintle",\
                 fieldBits, verbose)
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("stringOffset", data)
+            record_offset += fieldBits
 
             # User SID length
             fieldBits = 32
@@ -290,6 +310,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("userSidLength", data)
+            record_offset += fieldBits
 
             # User SID offset
             fieldBits = 32 
@@ -298,6 +319,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("userSidOffset", data)
+            record_offset += fieldBits
 
             # Data length
             fieldBits = 32 
@@ -306,6 +328,7 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("dataLength", data)
+            record_offset += fieldBits
 
             # Data offset
             fieldBits = 32
@@ -314,21 +337,49 @@ class EvtPlugin(plugin.Plugin):
             if data == self.ERROR_END_OF_STREAM:
                 break
             r.setField("dataOffset", data)
+            record_offset += fieldBits
 
+            print "[DBG] Length of current record: %d" % r.getField("length")
+            print "[DBG] Offset into current record: %d" % record_offset
+            print "[DBG] Offset of SID: %d" % r.getField("userSidOffset")
+            print "[DBG] Offset of strings: %d" % r.getField("stringOffset")
+
+            # Source and computer name
+            fieldBits = (r.getField("userSidOffset")*8) - record_offset
+            if fieldBits < 0:
+                fieldBits = 0
+            source_comp = _bs.read("bytes:" + str(int(fieldBits/8)))
+            print "[DBG] Source/computer: %s" % binascii.b2a_qp(source_comp)
+            record_offset += fieldBits
+
+            print "Current index: %d" % _bs.pos
+            print "Current record offset (bytes): %d" % int(record_offset/8) 
+            print "Offset of strings: %d" % r.getField("stringOffset")
+    
+            # Calculate position of strings
+            offset_bytes = int(record_offset/8)
+            if int(r.getField("stringOffset")) > offset_bytes:
+                idx_delta = int(r.getField("stringOffset")) - offset_bytes
+                _bs.pos += idx_delta
+                print "[EVT] incremented position by %d" % idx_delta
+
+            string_length = int(r.getField("dataOffset")) -\
+                int(r.getField("stringOffset"))
+            print "[EVT] string length: %d" % string_length
+            strings = _bs.read("bytes:" + str(string_length))
+            print "strings: %s" % binascci.b2a_qp(strings)
+        
             # Variable data
             # FIXME: dont rely on peek() to avoid reading past end of stream
             fieldBits = int(r.getField("length"))
             try:
                 data = _bs.peek("bytes" + ":" + str(fieldBits))
             except bitstring.ReadError:
-                if verbose:
-                    print "[EVT]: Unable to read EVT data field; "\
-                        "it would be truncated"
+                fieldBits = _bs.length - _bs.pos
                 break
+    
             data = self.carveField(_bs, "varData", "bytes",\
                 fieldBits, verbose)
-            if data == self.ERROR_END_OF_STREAM:
-                break
             r.setField("varData", data)
 
             # SID
