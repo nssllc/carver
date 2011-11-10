@@ -239,15 +239,52 @@ class EvtPlugin(plugin.Plugin):
                 break
             r.setField("eventID", data)
             record_offset += fieldBits
-         
-            # Event RVA offset
-            fieldBits = 16 
-            data = self.carveField(_bs, "eventRVA", "uintle",\
-                    fieldBits, verbose)
+        
+            # Unknown
+            fieldBits = 8
+            data = _bs.read("bytes:" + str(fieldBits))
+            record_offset += fieldBits
+
+            # Unknown
+            fieldBits = 8
+            data = _bs.read("bytes:" + str(fieldBits))
+            record_offset += fieldBits
+
+            # Event type
+            fieldBits = 8
+            data = self.carveField(_bs, "eventType", "uintle",\
+                fieldBits, verbose)
             if data == self.ERROR_END_OF_STREAM:
                 break
-            r.setField("eventRVA", data)
+            r.setField("eventType", data)
             record_offset += fieldBits
+
+            # String count
+            fieldBits = 16
+            data = self.carveField(_bs, "numStrings", "uintle",\
+                fieldBits, verbose)
+            if data == self.ERROR_END_OF_STREAM:
+                break
+            r.setField("numStrings", data)
+            record_offset += fieldBits
+
+            # Category
+            fieldBits = 16
+            data = self.carveField(_bs, "eventCategory", "uintle",\
+                fieldBits, verbose)
+            if data == self.ERROR_END_OF_STREAM:
+                break
+            r.setField("eventCategory", data)
+            record_offset += fieldBits
+
+            # Event RVA offset
+            #fieldBits = 16 
+            #data = self.carveField(_bs, "eventRVA", "uintle",\
+            #        fieldBits, verbose)
+            #if data == self.ERROR_END_OF_STREAM:
+            #    break
+            #r.setField("eventRVA", data)
+            #record_offset += fieldBits
 
             # Event type
             fieldBits = 16 
