@@ -16,15 +16,17 @@ def verify_results(headers, records, name):
     passed, False otherwise."""
     # Determine which kind of records we have
     if name == evt_plugin.name:
-
+        print "Testing EVT plugin.", 
+        if records[0].getField("reserved") != "eLfL":
+            print "[FAILED] Unmatched field: reserved"
+            return False
     else:
         print "[FAILED] Internal error."
         return False
 
-    if len(records) != 4:
+    if len(records) != 1:
         print "[FAILED] Incorrect number of records found."
         return False
-
 
 if len(sys.argv) != 3:
     print "Usage: %s <config file> <data file>" % sys.argv[0]
@@ -39,5 +41,7 @@ cf = config.ConfigFile(cfg_path)
 for name in carver_lib.getSupportedTypes():
     plugin = carver_lib.getPlugin(name)
     (headers, records) = plugin.searchFile(data_path, cfg_path, verbose=True)
-    verify_results(headers, records, name)
+    passed = verify_results(headers, records, name)
+    if passed:
+        print "[PASSED]"
 
